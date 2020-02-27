@@ -164,7 +164,7 @@ function getKeys(arrTables, fieldName, arrKeys, currIndex, count, json, ignoreTa
 			`-h ${json.host}`,
 			(json.port ? `-P ${json.port }` : ''),
 			`-u ${json.user}`,
-			(json.password ? `-P ${json.password }` : ''),
+			(json.password ? `-p${json.password }` : ''),
 			ignoreTablesStr,
 			json.database
 		].filter(item => item.length).join(' ')
@@ -183,11 +183,11 @@ function getKeys(arrTables, fieldName, arrKeys, currIndex, count, json, ignoreTa
 		commands.push(`mysqldump --extended-insert --disable-keys --flush-logs --no-autocommit --no-create-info ${args}`)
 		commands.push(`${catCmd} ${createIndexFile}`)
 
-		let str = process.platform === 'win32' ? '(' + commands.join(' & ') + ')' : '{' + commands.join('; ') + ';}'
+		let str = process.platform === 'win32' ? '(' + commands.join(' & ') + ')' : '{' + commands.join('; \n') + ';}'
 
 		switch (json.compress) {
 			case 'bzip2':
-				str += ' | bzip2 > ' + path.join(json.target_path, json.fileName) + '.bz2';
+				str += ' | bzip2 > ' + path.join(json.target_path, json.fileName + '.bz2');
 				break;
 			case 'lz4c':
 				str += ' | lz4c -4f  - ' + path.join(json.target_path, json.fileName + '.lz4')
