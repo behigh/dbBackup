@@ -1,6 +1,7 @@
 const path = require('path')
 const fs = require('fs')
 const mysql = require('mysql')
+const os = require('os')
 
 let configFile = process.argv[2]
 
@@ -183,7 +184,7 @@ function getKeys(arrTables, fieldName, arrKeys, currIndex, count, json, ignoreTa
 		commands.push(`mysqldump --extended-insert --disable-keys --flush-logs --no-autocommit --no-create-info ${args}`)
 		commands.push(`${catCmd} ${createIndexFile}`)
 
-		let str = process.platform === 'win32' ? '(' + commands.join(' & ') + ')' : '{' + commands.join('; \n') + ';}'
+		let str = process.platform === 'win32' ? '(' + commands.join(' & ') + ')' : '{ ' + commands.join(';' + os.EOL) + '; }'
 
 		switch (json.compress) {
 			case 'bzip2':
