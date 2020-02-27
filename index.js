@@ -85,7 +85,7 @@ function test(...args) {
 	process.exit()
 }
 
-function getKeys(arrTables, fieldName, arrKeys, currIndex, count, json, ignoreTablesStr, arrIgnoreTables, clinet) {
+function getKeys(arrTables, fieldName, arrKeys, currIndex, count, cfg, ignoreTablesStr, arrIgnoreTables, clinet) {
 
 	if (currIndex < count) {
 
@@ -97,8 +97,8 @@ function getKeys(arrTables, fieldName, arrKeys, currIndex, count, json, ignoreTa
 				    S1.SEQ_IN_INDEX AS Seq_in_index,
 					S1.COLUMN_NAME AS Column_name,
 				    S1.SUB_PART AS Sub_part
-				FROM (SELECT * FROM information_schema.STATISTICS S WHERE S.TABLE_SCHEMA='${json.database}' and S.TABLE_NAME='${arrTables[currIndex][fieldName]}') S1 
-				LEFT JOIN (SELECT * FROM information_schema.KEY_COLUMN_USAGE K where K.TABLE_SCHEMA='${json.database}' and K.TABLE_NAME='${arrTables[currIndex][fieldName]}') K1 on S1.COLUMN_NAME = K1.COLUMN_NAME
+				FROM (SELECT * FROM information_schema.STATISTICS S WHERE S.TABLE_SCHEMA='${cfg.database}' and S.TABLE_NAME='${arrTables[currIndex][fieldName]}') S1 
+				LEFT JOIN (SELECT * FROM information_schema.KEY_COLUMN_USAGE K where K.TABLE_SCHEMA='${cfg.database}' and K.TABLE_NAME='${arrTables[currIndex][fieldName]}') K1 on S1.COLUMN_NAME = K1.COLUMN_NAME
 				WHERE K1.TABLE_SCHEMA is null;
 			`
 
@@ -120,12 +120,12 @@ function getKeys(arrTables, fieldName, arrKeys, currIndex, count, json, ignoreTa
 					}
 				}
 				setTimeout(() => {
-					getKeys(arrTables, fieldName, arrKeys, currIndex + 1, count, json, ignoreTablesStr, arrIgnoreTables, clinet)
+					getKeys(arrTables, fieldName, arrKeys, currIndex + 1, count, cfg, ignoreTablesStr, arrIgnoreTables, clinet)
 				}, 10)
 			})
 		} else {
 			setTimeout(() => {
-				getKeys(arrTables, fieldName, arrKeys, currIndex + 1, count, json, ignoreTablesStr, arrIgnoreTables, clinet)
+				getKeys(arrTables, fieldName, arrKeys, currIndex + 1, count, cfg, ignoreTablesStr, arrIgnoreTables, clinet)
 			}, 10)
 		}
 	} else {
@@ -143,8 +143,8 @@ function getKeys(arrTables, fieldName, arrKeys, currIndex, count, json, ignoreTa
 			}
 		}
 
-		const dropIndexFile = path.join(json.target_path, `${json.database}_${json.fileTS}_DROP_INDEX.sql`)
-		const createIndexFile = path.join(json.target_path, `${json.database}_${json.fileTS}_CREATE_INDEX.sql`)
+		const dropIndexFile = path.join(cfg.target_path, `${cfg.database}_${cfg.fileTS}_DROP_INDEX.sql`)
+		const createIndexFile = path.join(cfg.target_path, `${cfg.database}_${cfg.fileTS}_CREATE_INDEX.sql`)
 
 
 
@@ -162,20 +162,20 @@ function getKeys(arrTables, fieldName, arrKeys, currIndex, count, json, ignoreTa
 		})
 
 		let args = [
-			`-h ${json.host}`,
-			(json.port ? `-P ${json.port }` : ''),
-			`-u ${json.user}`,
-			(json.password ? `-p${json.password }` : ''),
+			`-h ${cfg.host}`,
+			(cfg.port ? `-P ${cfg.port }` : ''),
+			`-u ${cfg.user}`,
+			(cfg.password ? `-p${cfg.password }` : ''),
 			ignoreTablesStr,
-			json.database
+			cfg.database
 		].filter(item => item.length).join(' ')
 
 		let commands = []
 
-		if (parseInt(json.takeProcedure) === 1) {
+		if (parseInt(cfg.takeProcedure) === 1) {
 			commands.push(`mysqldump --comments --triggers --routines --no-data ${args}`)
 		} else {
-			commands.push(`mysqldump --comments --no-data ${args}`)
+			commands.push(`mysqldump --comments --no-data --skip-triggers ${args}`)
 		}
 
 		const catCmd = process.platform === 'win32' ? 'type' : 'cat'
@@ -188,13 +188,13 @@ function getKeys(arrTables, fieldName, arrKeys, currIndex, count, json, ignoreTa
 
 		switch (cfg.compress) {
 			case 'bzip2':
-				str += ' | bzip2 > ' + path.join(json.target_path, json.fileName + '.bz2');
+				str += ' | bzip2 > ' + path.join(cfg.target_path, cfg.fileName + '.bz2');
 				break;
 			case 'lz4c':
-				str += ' | lz4c -4f  - ' + path.join(json.target_path, json.fileName + '.lz4')
+				str += ' | lz4c -4f  - ' + path.join(cfg.target_path, cfg.fileName + '.lz4')
 				break;
 			default:
-				str += ' > ' + path.join(json.target_path, json.fileName)
+				str += ' > ' + path.join(cfg.target_path, cfg.fileName)
 				break
 		}
 
