@@ -186,7 +186,7 @@ function getKeys(arrTables, fieldName, arrKeys, currIndex, count, json, ignoreTa
 
 		let str = process.platform === 'win32' ? '(' + commands.join(' & ') + ')' : '{ ' + commands.join(';' + os.EOL) + '; }'
 
-		switch (json.compress) {
+		switch (cfg.compress) {
 			case 'bzip2':
 				str += ' | bzip2 > ' + path.join(json.target_path, json.fileName + '.bz2');
 				break;
