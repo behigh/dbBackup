@@ -15,4 +15,9 @@ How it works?
 
 - With this technique it takes 10 mins to backup the same DB and 50 mins to restore - **savings of 9 hours!**
 
-## Follwing dependencies are there for dbBackup.js
+## Usage
+Create a config.js based on config.sample.js
+
+Install dependencies `npm i`
+
+Run `node . config.js`
